@@ -23,7 +23,7 @@ def toBWSimple(img):
     return c
 
 def closestColor(val, colors):
-    dists = [np.linalg.norm(col - val) for key, col in colors]
+    dists = [np.linalg.norm(col - val, ord=1) for key, col in colors]
     min_ind = dists.index(min(dists))
     return colors[min_ind][0], np.array(val - colors[min_ind][1])
 
@@ -79,7 +79,6 @@ def longusMongus(img, colors):
     for i in range(n):
         x, y = np.random.randint(0, w), np.random.randint(0, h)
         r = 4
-        error = color_name_map[matched[y][x]] - img[y][x]
         neighbor_error = np.zeros(3)
         sum_weight= 0
         for j in range(-r, r + 1):
@@ -87,12 +86,12 @@ def longusMongus(img, colors):
                 if (x + j >= 0 and x + j < w and y + k >= 0 and y + k < h):
                     d = np.linalg.norm(np.array([j, k]))
                     if (d > 0) and (d <= r):
-                        weight = 1 / d
+                        weight = d**(-1/2)
                         neighbor_error += (color_name_map[matched[y + k][x + j]] - img[y + k][x + j]) * weight
                         sum_weight += weight
 
         neighbor_error /= sum_weight
-        matched[y][x] = closestColor(img[y][x] - error / 2 - neighbor_error / 2, colors)[0]
+        matched[y][x] = closestColor(img[y][x] - neighbor_error, colors)[0]
     return matched
 
 
